@@ -17,9 +17,9 @@ class NEAT:
         # creating initial nodes to be provided to genomes to create initial population
         inital_nodes = []
         for i in range(n_inputs):
-            inital_nodes.append( self.nodes.add_node(NodeTyep.INPUT) )
+            inital_nodes.append( self.nodes.add_node(NodeTyep.INPUT, pos = i))
         for i in range(n_outputs):
-            inital_nodes.append( self.nodes.add_node(NodeTyep.OUTPUT) )
+            inital_nodes.append( self.nodes.add_node(NodeTyep.OUTPUT, pos = i))
         
         self.test_gnome = Gnome(innovations = self.innovations, nodes_gen = self.nodes, nodes=inital_nodes, connection_mutation=1, node_mutation=1)
         self.nn = NeuralNetwork(gnome = self.test_gnome)
