@@ -63,7 +63,7 @@ class Gnome:
 		else:
 			# get old node from innovation
 			inserted_node = self.node_gen.get_node(innovation.inserted_node_id)
-			
+		self.nodes.append(inserted_node)
 		#adding connection between in_node and inserted node
 		i = self.innovations.get_innovation(in_node_id = in_node.id, out_node_id = inserted_node.id, innovation_type = InnovationType.CONNECTION)
 		self.connection_genes.append(ConnectionGene(in_node_id = in_node.id, out_node_id = inserted_node.id, enable = True, innovation_number = i.innovation_number, weight = 1))

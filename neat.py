@@ -1,6 +1,7 @@
 from gnome import Gnome
 from innovation import InnovationList
 from nodegene import NodeList , NodeTyep
+from neural_network import NeuralNetwork
 
 import numpy as np 
 
@@ -21,17 +22,18 @@ class NEAT:
             inital_nodes.append( self.nodes.add_node(NodeTyep.OUTPUT) )
         
         self.test_gnome = Gnome(innovations = self.innovations, nodes_gen = self.nodes, nodes=inital_nodes, connection_mutation=1, node_mutation=1)
+        self.nn = NeuralNetwork(gnome = self.test_gnome)
 
 if __name__ == "__main__":
     neat = NEAT(2 , 1)
 
-    print('-'*5 , "before mutation" , '-'*5)
-    neat.innovations.print_innovations()
-    #neat.nodes.print_nodes()
-    # neat.test_gnome.print_connections() 
+    # print('-'*5 , "before mutation" , '-'*5)
+    # neat.innovations.print_innovations()
+    # neat.nodes.print_nodes()
+    neat.test_gnome.print_connections() 
     
-    print('-'*5 , "after mutation" , '-'*5)
-    neat.test_gnome.mutate()
-    neat.innovations.print_innovations()
+    # print('-'*5 , "after mutation" , '-'*5)
+    # neat.test_gnome.mutate()
+    # neat.innovations.print_innovations()
     #neat.nodes.print_nodes()
     # neat.test_gnome.print_connections()    
