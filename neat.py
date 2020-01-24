@@ -21,8 +21,21 @@ class NEAT:
         for i in range(n_outputs):
             inital_nodes.append( self.nodes.add_node(NodeTyep.OUTPUT, pos = i))
         
-        self.test_gnome = Gnome(innovations = self.innovations, nodes_gen = self.nodes, nodes=inital_nodes, connection_mutation=1, node_mutation=1)
-        self.nn = NeuralNetwork(gnome = self.test_gnome)
+        self.test_gnome1 = Gnome(innovations = self.innovations, nodes_gen = self.nodes, nodes=inital_nodes, connection_mutation=1, node_mutation=1)
+        self.test_gnome2 = Gnome(innovations = self.innovations, nodes_gen = self.nodes, nodes=inital_nodes, connection_mutation=1, node_mutation=1)
+        
+        self.test_gnome1.mutate_connection()
+        self.test_gnome2.mutate_connection()
+        
+        child = Gnome.crossover(self.test_gnome1 , self.test_gnome2)
+        
+        print('-'*10 , 'parent1')
+        self.test_gnome1.print_connections()
+        print('-'*10 , 'parent2')
+        self.test_gnome2.print_connections()
+        print('-'*10 , 'child')
+        child.print_connections()
+        # self.nn = NeuralNetwork(gnome = self.test_gnome)
 
 if __name__ == "__main__":
     neat = NEAT(2 , 1)
@@ -30,7 +43,7 @@ if __name__ == "__main__":
     # print('-'*5 , "before mutation" , '-'*5)
     # neat.innovations.print_innovations()
     # neat.nodes.print_nodes()
-    neat.test_gnome.print_connections() 
+    # neat.test_gnome.print_connections() 
     
     # print('-'*5 , "after mutation" , '-'*5)
     # neat.test_gnome.mutate()

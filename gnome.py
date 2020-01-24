@@ -3,6 +3,7 @@ from connectiongene import ConnectionGene
 from innovation import InnovationType
 from nodegene import NodeTyep
 
+from copy import deepcopy
 #TODO add mutation without recursion
 
 class Gnome:
@@ -20,7 +21,7 @@ class Gnome:
 		self.node_mutation = node_mutation
 		self.attempt_to_find_unlinked_nodes = attempt_to_find_unlinked_nodes
 		
-		self.mutate_connection() # creating initial connection
+		# self.mutate_connection() # creating initial connection
 
 	def is_connected(self, node1, node2):
 		#function to find if two nodes are connected or not
@@ -94,3 +95,37 @@ class Gnome:
 		# function to print connection_genes list
 		for i in self.connection_genes:
 			i.print_connection()
+
+	def get_connection(self , innovation_number):
+		for i in self.connection_genes:
+			if i.innovation_number == innovation_number:
+				return i
+		return False
+
+	@staticmethod
+	def crossover(gnome1 , gnome2):
+		child = None
+		gnome1.connection_genes.sort(key = lambda x : x.innovation_number)
+		gnome2.connection_genes.sort(key = lambda x : x.innovation_number)
+
+		connections = None
+
+		nodes = list(set().union(gnome1.nodes , gnome2.nodes))
+		child = Gnome(gnome1.innovations, gnome1.node_gen, nodes = nodes)	 
+
+		if len(gnome1.connection_genes) > len(gnome2.connection_genes):
+			child.connection_genes = deepcopy(gnome1.connection_genes)
+			connections = deepcopy(gnome2.connection_genes)
+		else:
+			child.connection_genes = deepcopy(gnome2.connection_genes)
+			connections = deepcopy(gnome1.connection_genes)
+
+		for connection in connections:
+			temp = child.get_connection(connection.innovation_number)
+			if temp:
+				print(connection.weight)
+				print(temp.weight)
+				temp.weight = (temp.weight + connection.weight)/2
+			else:
+				child.connection_genes.append(connection)
+		return child
