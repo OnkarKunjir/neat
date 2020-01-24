@@ -123,8 +123,6 @@ class Gnome:
 		for connection in connections:
 			temp = child.get_connection(connection.innovation_number)
 			if temp:
-				print(connection.weight)
-				print(temp.weight)
 				temp.weight = (temp.weight + connection.weight)/2
 			else:
 				child.connection_genes.append(connection)

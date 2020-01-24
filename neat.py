@@ -2,6 +2,7 @@ from gnome import Gnome
 from innovation import InnovationList
 from nodegene import NodeList , NodeTyep
 from neural_network import NeuralNetwork
+from species import Species
 
 import numpy as np 
 
@@ -29,12 +30,9 @@ class NEAT:
         
         child = Gnome.crossover(self.test_gnome1 , self.test_gnome2)
         
-        print('-'*10 , 'parent1')
-        self.test_gnome1.print_connections()
-        print('-'*10 , 'parent2')
-        self.test_gnome2.print_connections()
-        print('-'*10 , 'child')
-        child.print_connections()
+        self.species = Species(None)
+        self.species.speciate([self.test_gnome1 , self.test_gnome2])
+        print(self.species.n_species)
         # self.nn = NeuralNetwork(gnome = self.test_gnome)
 
 if __name__ == "__main__":
