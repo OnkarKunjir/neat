@@ -1,7 +1,7 @@
 from neat import NEAT
 import numpy as np
 data = [[0 , 0] , [0 , 1] , [1 , 0] , [1 , 1]]
-labels = [0 , 0 , 0 , 0]
+labels = [0 , 1 , 1 , 1]
 
 def fitness(nn , return_output = False):
     loss = 0
@@ -11,13 +11,17 @@ def fitness(nn , return_output = False):
         # output = nn.feed_forward(data[i])
         loss += np.abs(output[-1][0] - labels[i])
         # loss += np.abs(np.round(output[-1][0]) - labels[i])
+    
+    fitness = 1 - loss/4
     if not return_output:
-        return 1 - loss/4
-    return (1-loss/4 , output)
+        return fitness
+    return (fitness , output)
 
 
 if __name__ == "__main__":
     neat = NEAT(2 , 1)
-    neat.train(fitness , max_generations = 10)
-    l = fitness(neat.get_performace(return_nn=True)[0] , True)
-    print('loss' , l)
+    for i in range(10):
+        neat.epoch(fitness)
+    # neat.train(fitness , max_generations = 20)
+    # l = fitness(neat.get_performace(return_nn=True)[0] , True)
+    # print('fitness' , l)

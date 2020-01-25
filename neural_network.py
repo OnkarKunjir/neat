@@ -4,13 +4,14 @@ class NeuronType:
     INPUT, OUTPUT, HIDEEN, BIAS = range(4)
 
 class Neuron:
-    def __init__(self, id, neuron_type, pos = 0):
+    def __init__(self, id, neuron_type, bias, pos = 0):
         self.id = id
         self.neuron_type = neuron_type
         self.value = 0
         self.pos = pos
         # contains dict neuron id : weight of link
         self.input_links = []
+        self.bias = bias
 
 class NeuralNetwork:
     def __init__(self , gnome):
@@ -28,7 +29,7 @@ class NeuralNetwork:
             if i.layer not in self.layers_info.keys():
                 self.layers_info[i.layer] = 0
             self.layers_info[i.layer] += 1
-            self.neurons[i.id] = Neuron(i.id, i.node_type, i.pos)
+            self.neurons[i.id] = Neuron(i.id, i.node_type, i.bias, i.pos)
 
             if i.node_type == NeuronType.INPUT:
                 self.input_neurons_id.append(i.id)
@@ -57,7 +58,7 @@ class NeuralNetwork:
             total = 0
             for connection in neuron.input_links:
                 total += connection.weight * self.neurons[connection.in_node_id].value
-            neuron.value = self.sigmoid(total)
+            neuron.value = self.sigmoid(total + neuron.bias)
             
         output = [ self.neurons[i].value for i in self.output_neurons_id] 
         return output

@@ -22,6 +22,7 @@ class Gnome:
 		self.node_mutation = node_mutation
 		self.attempt_to_find_unlinked_nodes = attempt_to_find_unlinked_nodes
 		
+		self.species_id = None
 		# self.mutate_connection() # creating initial connection
 
 	def is_connected(self, node1, node2):
@@ -64,7 +65,7 @@ class Gnome:
 		inserted_node = None
 		if innovation.inserted_node_id == None:
 			# create new node to be inserted
-			inserted_node = self.node_gen.add_node(node_type = np.random.choice([NodeTyep.HIDDEN , NodeTyep.BIAS]), layer = (in_node.layer + out_node.layer)/2)
+			inserted_node = self.node_gen.add_node(node_type = NodeTyep.HIDDEN, layer = (in_node.layer + out_node.layer)/2)
 			innovation.inserted_node_id = inserted_node.id
 			connection.enable = False
 		
@@ -95,9 +96,19 @@ class Gnome:
 				if np.random.rand() < self.weight_reset_prob:
 					i.weight = np.random.randn()
 				else:
-					i.weight += np.random.randn()
+					i.weight += np.random.randn() 
 		
+		for i in self.nodes:
+			# update bias
+			if i.node_type == NodeTyep.INPUT:
+				continue
 
+			if np.random.rand() < self.weight_mutation:
+				if np.random.rand() < self.weight_reset_prob:
+					i.bias = np.random.randn()
+				else:
+					i.bias += np.random.randn() 
+		
 	def print_connections(self):
 		# function to print connection_genes list
 		for i in self.connection_genes:

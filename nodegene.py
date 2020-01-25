@@ -8,6 +8,7 @@ class Node:
         self.node_type = node_type
         self.layer = layer
         self.pos = pos
+        self.bias = 0
         if self.layer == None:
             if node_type == NodeTyep.INPUT:
                 self.layer = 0
