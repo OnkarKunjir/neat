@@ -33,11 +33,24 @@ class NEAT:
             self.population.append(g)        
         
         self.species = Species()
-        self.species.speciate(self.population)
-    
+        
     def train(self , fitness_func , max_generations = 100):
         for generation in range(max_generations):
+            print('generation : ' , generation)
+            self.species.speciate(self.population)
             self.species.calc_fitness(fitness_func = fitness_func)
+            if self.get_performace() > 0.8:
+                break
+            self.population = self.species.natural_selection(self.population_size)
+            
+    def get_performace(self , return_nn = False):
+        # self.species.performace()
+        genome = max(self.population , key = lambda x:x.fitness)
+        if return_nn:
+            self.species.performace()
+        
+            return NeuralNetwork(genome) , genome.fitness
+        return genome.fitness
 
 if __name__ == "__main__":
     neat = NEAT(2 , 1)

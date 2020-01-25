@@ -17,7 +17,7 @@ class Species:
 
     def get_representatives(self , id):
         representative = self.representatives.get(id) 
-        if representative:
+        if representative == None:
             representative = np.random.choice(self.species[id])
             self.representatives[id] = representative
         return representative
@@ -57,6 +57,9 @@ class Species:
 
     def speciate(self, population):
         s = 0
+        self.n_species = 0
+        self.species = {}
+
         if self.n_species == 0:
             # if there are no species
             self.n_species += 1
@@ -66,7 +69,8 @@ class Species:
         for i in range(s , len(population)):
             found_match = False
             for j in list(self.species.keys()):
-                representive = np.random.choice(self.species[j])
+                # representive = np.random.choice(self.species[j])
+                representive = self.get_representatives(j)
                 delta = self.compactibility(population[i] , representive)
                 # print(delta)
                 if delta < self.delta_t:
@@ -82,7 +86,46 @@ class Species:
 
     def calc_fitness(self, fitness_func = None):
         if fitness_func:
+            # population = []
+            # for i in self.species.values():
+            #     population += i
+
             for species in self.species.keys():
                 for genome in self.species[species]:
-                    genome.fitness = fitness_func(NeuralNetwork(genome))
+                    f = fitness_func(NeuralNetwork(genome))
+                    # deltas = [self.compactibility(genome , i) for i in population]
+                    # den = 1
+                    # for d in deltas:
+                    #     if d < self.delta_t:
+                    #         den += 1
+                    genome.fitness = f 
+    
+
+    def performace(self):
+        for i in self.species.keys():
+            genomes = self.species[i]
+            avg_fitness = 0
+            n = 0
+            for gnome in genomes:
+                avg_fitness += gnome.fitness
+                n += 1
+            print('species : ' , int(i) , ' avarage_fitness : ' , avg_fitness/n)
+
+    def natural_selection(self, population_size):
+        population = []
+        selection_prob = {}
+        species_keys = list(self.species.keys())
         
+        for i in species_keys:
+            self.species[i].sort(key = lambda x : x.fitness)
+            n = len(self.species[i])
+            selection_prob[i] =  np.arange(1 , 1+n) / (n*(n+1)/2)
+        
+
+        for i in range(population_size):
+            key = np.random.choice(species_keys)
+            gnome = np.random.choice(self.species[key] , p = selection_prob[key])
+            gnome.mutate()
+            population.append(gnome)
+        
+        return population

@@ -1,7 +1,7 @@
 # TODO: add bias node type
 
 class NodeTyep:
-    INPUT , OUTPUT , HIDDEN = range(3)
+    INPUT , OUTPUT , HIDDEN , BIAS = range(4)
 class Node:
     def __init__(self , id , node_type , layer = None , pos = 0):
         self.id = id

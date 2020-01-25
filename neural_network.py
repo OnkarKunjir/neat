@@ -1,7 +1,7 @@
 import numpy as np
 
 class NeuronType:
-    INPUT, OUTPUT, HIDEEN = range(3)
+    INPUT, OUTPUT, HIDEEN, BIAS = range(4)
 
 class Neuron:
     def __init__(self, id, neuron_type, pos = 0):
@@ -42,6 +42,10 @@ class NeuralNetwork:
 
         for i in range(100):
             self.feed_forward([1,1])
+
+    def sigmoid(self , x):
+        return 1/(1+np.exp(-x))
+
     def feed_forward(self , inputs):
         
         # performing the computation
@@ -53,7 +57,7 @@ class NeuralNetwork:
             total = 0
             for connection in neuron.input_links:
                 total += connection.weight * self.neurons[connection.in_node_id].value
-            neuron.value = total
+            neuron.value = self.sigmoid(total)
             
         output = [ self.neurons[i].value for i in self.output_neurons_id] 
         return output

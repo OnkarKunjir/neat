@@ -44,7 +44,7 @@ class Gnome:
 				innovation_number = self.innovations.get_innovation(node1.id, node2.id, innovation_type = InnovationType.CONNECTION).innovation_number
 				self.connection_genes.append( ConnectionGene(in_node_id = node1.id, out_node_id=node2.id, enable = True, innovation_number = innovation_number) )
 				return True
-				
+
 		for i in range(self.attempt_to_find_unlinked_nodes):
 			node1 = np.random.choice(self.nodes)
 			node2 = np.random.choice(self.nodes)
@@ -64,7 +64,7 @@ class Gnome:
 		inserted_node = None
 		if innovation.inserted_node_id == None:
 			# create new node to be inserted
-			inserted_node = self.node_gen.add_node(node_type = NodeTyep.HIDDEN, layer = (in_node.layer + out_node.layer)/2)
+			inserted_node = self.node_gen.add_node(node_type = np.random.choice([NodeTyep.HIDDEN , NodeTyep.BIAS]), layer = (in_node.layer + out_node.layer)/2)
 			innovation.inserted_node_id = inserted_node.id
 			connection.enable = False
 		
