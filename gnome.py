@@ -14,6 +14,7 @@ class Gnome:
 		self.innovations = innovations	#InnovationList object
 		self.node_gen = nodes_gen	#NodeList object
 
+		self.fitness = 0
 		# parameters for mutation
 		self.weight_mutation = weight_mutation	
 		self.weight_reset_prob = weight_reset_prob
@@ -36,8 +37,14 @@ class Gnome:
 				return i
 		return None
 
-	def mutate_connection(self):
+	def mutate_connection(self, node1 = None, node2 = None):
 		#function which adds new connection between 2 unconnected nodes and updates connection gene
+		if node1:
+			if not self.is_connected(node1.id , node2.id) and (node1.layer < node2.layer):
+				innovation_number = self.innovations.get_innovation(node1.id, node2.id, innovation_type = InnovationType.CONNECTION).innovation_number
+				self.connection_genes.append( ConnectionGene(in_node_id = node1.id, out_node_id=node2.id, enable = True, innovation_number = innovation_number) )
+				return True
+				
 		for i in range(self.attempt_to_find_unlinked_nodes):
 			node1 = np.random.choice(self.nodes)
 			node2 = np.random.choice(self.nodes)

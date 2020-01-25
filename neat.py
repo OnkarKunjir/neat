@@ -8,9 +8,11 @@ import numpy as np
 
 
 class NEAT:
-    def __init__(self, n_inputs, n_outputs):
+    def __init__(self, n_inputs, n_outputs, population_size = 100):
         self.n_inputs = n_inputs
         self.n_outputs = n_outputs
+        self.population_size = population_size
+        self.population = []
 
         self.nodes = NodeList()
         self.innovations = InnovationList()
@@ -22,18 +24,20 @@ class NEAT:
         for i in range(n_outputs):
             inital_nodes.append( self.nodes.add_node(NodeTyep.OUTPUT, pos = i))
         
-        self.test_gnome1 = Gnome(innovations = self.innovations, nodes_gen = self.nodes, nodes=inital_nodes, connection_mutation=1, node_mutation=1)
-        self.test_gnome2 = Gnome(innovations = self.innovations, nodes_gen = self.nodes, nodes=inital_nodes, connection_mutation=1, node_mutation=1)
+
+        for i in range(population_size):
+            g = Gnome(innovations = self.innovations, nodes_gen = self.nodes, nodes=inital_nodes)
+            node1 = np.random.choice(inital_nodes[:n_inputs])
+            node2 = np.random.choice(inital_nodes[n_inputs:])
+            g.mutate_connection(node1 = node1, node2 = node2)
+            self.population.append(g)        
         
-        self.test_gnome1.mutate_connection()
-        self.test_gnome2.mutate_connection()
-        
-        child = Gnome.crossover(self.test_gnome1 , self.test_gnome2)
-        
-        self.species = Species(None)
-        self.species.speciate([self.test_gnome1 , self.test_gnome2])
-        print(self.species.n_species)
-        # self.nn = NeuralNetwork(gnome = self.test_gnome)
+        self.species = Species()
+        self.species.speciate(self.population)
+    
+    def train(self , fitness_func , max_generations = 100):
+        for generation in range(max_generations):
+            self.species.calc_fitness(fitness_func = fitness_func)
 
 if __name__ == "__main__":
     neat = NEAT(2 , 1)

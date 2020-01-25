@@ -1,7 +1,9 @@
 import numpy as np
+from neural_network import NeuralNetwork
+
 class Species:
     # class to classify gnomes into various species
-    def __init__(self, population, c1 = 1, c2 = 1, c3 = 0.4, delta_t = 3):
+    def __init__(self, c1 = 1, c2 = 1, c3 = 0.4, delta_t = 3):
         self.n_species = 0
         self.species = {}
 
@@ -12,7 +14,7 @@ class Species:
         self.c2 = c2
         self.c3 = c3
         self.delta_t = delta_t
-    
+
     def get_representatives(self , id):
         representative = self.representatives.get(id) 
         if representative:
@@ -78,6 +80,9 @@ class Species:
         
         self.update_representatives()
 
-    def calc_fitness(self):
-        # TODO: calculate fitness of each species
-        pass
+    def calc_fitness(self, fitness_func = None):
+        if fitness_func:
+            for species in self.species.keys():
+                for genome in self.species[species]:
+                    genome.fitness = fitness_func(NeuralNetwork(genome))
+        
