@@ -1,11 +1,13 @@
 import numpy as np
 class Species:
+    # class to classify gnomes into various species
     def __init__(self, population, c1 = 1, c2 = 1, c3 = 0.4, delta_t = 3):
         self.n_species = 0
         self.species = {}
 
-        self.representatives = {}
+        self.representatives = {}   # representive of each species
 
+        # constants to calculate the compactibility value
         self.c1 = c1
         self.c2 = c2
         self.c3 = c3
@@ -19,10 +21,12 @@ class Species:
         return representative
 
     def update_representatives(self):
+        # update representatives of all species 
         for i in list(self.species.keys()):
             self.representatives[i] = np.random.choice( self.species[i] )
             
     def compactibility(self , gnome1 , gnome2):
+        # returns compactibility value (delta)
         E = D = W = 0
         len1 = len(gnome1.connection_genes)
         len2 = len(gnome2.connection_genes)
@@ -52,6 +56,7 @@ class Species:
     def speciate(self, population):
         s = 0
         if self.n_species == 0:
+            # if there are no species
             self.n_species += 1
             self.species[self.n_species] = [population[0]]
             s = 1
@@ -67,6 +72,7 @@ class Species:
                     found_match = True
                     break
             if not found_match:
+                # if no match found make new species
                 self.n_species += 1
                 self.species[self.n_species] = [population[i]]
         

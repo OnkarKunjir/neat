@@ -6,7 +6,7 @@ class Visualize:
         self.display_size = display_size
         pygame.init()
         self.surface = pygame.display.set_mode(self.display_size)
-        pygame.display.set_caption('NEAT GNOME')``
+        pygame.display.set_caption('NEAT GNOME')
     
     def draw_node(self, location):
         pygame.draw.circle(self.surface, (255, 255, 255), location, 50)
