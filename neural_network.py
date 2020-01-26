@@ -45,7 +45,7 @@ class NeuralNetwork:
             self.feed_forward([1,1])
 
     def sigmoid(self , x):
-        return 1/(1+np.exp(-x))
+        return 1/(1+np.exp(-4.9*x))
 
     def feed_forward(self , inputs):
         

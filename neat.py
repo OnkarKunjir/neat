@@ -4,6 +4,7 @@ from nodegene import NodeList , NodeTyep
 from neural_network import NeuralNetwork
 from species import Species
 
+from copy import deepcopy
 import numpy as np 
 
 
@@ -27,6 +28,9 @@ class NEAT:
         self.delta_t = delta_t
         self.max_tries_to_search = 3
         
+        self.best_of_each_generation = {}
+        self.generation = 0
+
         # creating initial nodes to be provided to genomes to create initial population
         self.inital_nodes = []
         for i in range(n_inputs):
@@ -36,7 +40,6 @@ class NEAT:
     
     def epoch(self, fitness_func):
         self.population[:] = []
-        print(len(self.species))
         total_average = sum(s.average_fitness for s in self.species)
         for s in self.species:
             s.spawns_required = int(round(self.population_size * s.average_fitness / total_average))
@@ -44,24 +47,36 @@ class NEAT:
         species = []
         
         for s in self.species:
+            # remove the species which are not improving 
             if s.generations_not_improved < self.number_generation_allowed_to_not_improve and s.spawns_required > 0:
                 species.append(s)
         
-        for s in self.species:
-            k = max(1 , round(len(s.members)*s.survival_rate))
-            # mating_pool = s.members[:k]
-            # s.members[:] = []
-            s.members = s.members[:k]
-            # while len(s.members) < s.spawns_required:
-            #     n = min(len(mating_pool), self.max_tries_to_search)
-            #     g1 = self.tournament_selection(mating_pool, n)
-            #     g2 = self.tournament_selection(mating_pool, n)
-            for m in s.members:
-                m.mutate()
-
-        
         self.species[:] = species
 
+        for s in self.species:
+            for m in s.members:
+                if np.random.rand() < 0.25:
+                    m.mutate()
+
+        for s in self.species:
+            # performing cross over
+            # process of natural selection
+            k = max(1 , round(len(s.members)*s.survival_rate))
+            mating_pool = s.members[:k] # members list is sorted every time fitness is caluclated (descending order)
+            s.members[:] = []
+            # s.members = s.members[:k]
+            while len(s.members) < s.spawns_required:
+                # if species has less members then crossover two randomly selected parents
+                n = min(len(mating_pool), self.max_tries_to_search)
+                g1 = self.tournament_selection(mating_pool, n)
+                g2 = self.tournament_selection(mating_pool, n)
+                g1.mutate()
+                g2.mutate()
+                child = Gnome.crossover(g1 , g2)
+                # child.mutate()
+                s.add_member(child)
+        
+        
         for s in self.species:
             self.population.extend(s.members)
             s.members[:] = []
@@ -69,13 +84,15 @@ class NEAT:
         
         
         while len(self.population) < self.population_size:
+            # create new genomes if population size is less
             g = Gnome(innovations = self.innovations, nodes_gen = self.nodes, nodes=self.inital_nodes)
             node1 = np.random.choice(self.inital_nodes[:self.n_inputs])
             node2 = np.random.choice(self.inital_nodes[self.n_inputs:])
             g.mutate_connection(node1 = node1, node2 = node2)
             self.population.append(g)
-
+        
         for i in self.population:
+            # catagorize population in species
             matched = False
             for s in self.species:
                 delta = self.compactibility(i , s.representative)
@@ -88,24 +105,21 @@ class NEAT:
                 self.n_species += 1
                 self.species.append(s)
 
+        #calculate fitness of each member in species
         self.evaluate(fitness_func = fitness_func)
 
-        # print('---------------------')
+        # delete species with no members
+        self.species[:] = filter(lambda s: len(s.members) > 0, self.species)
+
         for s in self.species:
-            s.members.sort(key = lambda x : x.fitness)
-            
-            if len(s.members) > 0:
-                s.representative = np.random.choice(s.members)
-
-            fitness = 0
-            for m in s.members:
-                fitness += m.fitness
-            fitness = fitness/len(s.members)
-            # print(fitness)
-            if np.abs(fitness - s.average_fitness) < 0.1:
+            s.members.sort(key = lambda x : x.fitness , reverse = True)
+            s.representative = np.random.choice(s.members)
+            s.average_fitness = sum([i.fitness for i in s.members ])/len(s.members)
+            if s.leader.fitness < s.members[0].fitness:
+                s.leader = deepcopy(s.members[0])
+            else:
                 s.generations_not_improved += 1
-            s.average_fitness = fitness
-
+    
     def evaluate(self, fitness_func = None):
         if fitness_func:
             for s in self.species:
@@ -144,10 +158,30 @@ class NEAT:
     def tournament_selection(self, genomes, number_to_compare):
         champion = None
         for _ in range(number_to_compare):
-            g = genomes[randint(0,len(genomes)-1)]
+            # g = genomes[randint(0,len(genomes)-1)]
+            g = np.random.choice(genomes)
             if champion == None or g.fitness > champion.fitness:
                 champion = g
         return champion
+
+    def get_best_genome(self):
+        leaders = [i.leader for i in self.species]
+        return max(leaders , key = lambda x : x.fitness)
+
+    def train(self, fitness_func, max_generations = 30, max_fitness = 1):
+        self.generation = 0
+        for i in range(max_generations):
+            self.epoch(fitness_func)
+            best_genome = self.get_best_genome()
+            print(best_genome.fitness)
+            self.best_of_each_generation[self.generation] = NeuralNetwork(best_genome)
+
+            if best_genome.fitness >= max_fitness:
+                print(fitness_func(NeuralNetwork(best_genome) , return_output=True))
+
+                break
+            self.generation += 1
+        return self.best_of_each_generation
 
 if __name__ == "__main__":
     neat = NEAT(2 , 1)

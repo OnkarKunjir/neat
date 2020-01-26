@@ -1,7 +1,7 @@
 from neat import NEAT
 import numpy as np
 data = [[0 , 0] , [0 , 1] , [1 , 0] , [1 , 1]]
-labels = [0 , 1 , 1 , 1]
+labels = [0 , 1 , 1 , 0]
 
 def fitness(nn , return_output = False):
     loss = 0
@@ -19,9 +19,11 @@ def fitness(nn , return_output = False):
 
 
 if __name__ == "__main__":
-    neat = NEAT(2 , 1)
-    for i in range(10):
-        neat.epoch(fitness)
+    neat = NEAT(2 , 1, 130)
+    best_gnomes = neat.train(fitness, 50, 0.86)
+
+    # for i in range(10):
+        # neat.epoch(fitness)
     # neat.train(fitness , max_generations = 20)
     # l = fitness(neat.get_performace(return_nn=True)[0] , True)
     # print('fitness' , l)

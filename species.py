@@ -1,12 +1,13 @@
 import numpy as np
 from neural_network import NeuralNetwork
+from copy import deepcopy
 
 class Species:
     def __init__(self, species_id, first_member):
         self.species_id = id
         self.members = []
 
-        self.leader = first_member
+        self.leader = deepcopy(first_member)
         self.leader_old = None
         self.representative = first_member
         self.generations_not_improved = 0
