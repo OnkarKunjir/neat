@@ -1,4 +1,4 @@
-from gnome import Gnome
+from gnome import Genome
 from innovation import InnovationList
 from nodegene import NodeList , NodeTyep
 from neural_network import NeuralNetwork
@@ -31,13 +31,7 @@ class NEAT:
         self.best_of_each_generation = {}
         self.generation = 0
 
-        # creating initial nodes to be provided to genomes to create initial population
-        self.inital_nodes = []
-        for i in range(n_inputs):
-            self.inital_nodes.append( self.nodes.add_node(NodeTyep.INPUT, pos = i))
-        for i in range(n_outputs):
-            self.inital_nodes.append( self.nodes.add_node(NodeTyep.OUTPUT, pos = i))
-    
+        
     def epoch(self, fitness_func):
         self.population[:] = []
         total_average = sum(s.average_fitness for s in self.species)
@@ -53,10 +47,10 @@ class NEAT:
         
         self.species[:] = species
 
-        for s in self.species:
-            for m in s.members:
-                if np.random.rand() < 0.25:
-                    m.mutate()
+        # for s in self.species:
+        #     for m in s.members:
+        #         if np.random.rand() < 0.25:
+        #             m.mutate()
 
         for s in self.species:
             # performing cross over
@@ -70,11 +64,15 @@ class NEAT:
                 n = min(len(mating_pool), self.max_tries_to_search)
                 g1 = self.tournament_selection(mating_pool, n)
                 g2 = self.tournament_selection(mating_pool, n)
-                g1.mutate()
-                g2.mutate()
-                child = Gnome.crossover(g1 , g2)
-                # child.mutate()
+                # g1.mutate()
+                # g2.mutate()
+                child = Genome.crossover(g1 , g2)
+                # if len(child.connection_genes) == 0:
+                #     continue
+                    # child = Genome(innovations = self.innovations, nodes_gen = self.nodes, n_inputs = self.n_inputs , n_outputs = self.n_outputs)
+                child.mutate()
                 s.add_member(child)
+                
         
         
         for s in self.species:
@@ -85,10 +83,7 @@ class NEAT:
         
         while len(self.population) < self.population_size:
             # create new genomes if population size is less
-            g = Gnome(innovations = self.innovations, nodes_gen = self.nodes, nodes=self.inital_nodes)
-            node1 = np.random.choice(self.inital_nodes[:self.n_inputs])
-            node2 = np.random.choice(self.inital_nodes[self.n_inputs:])
-            g.mutate_connection(node1 = node1, node2 = node2)
+            g = Genome(innovations = self.innovations, nodes_gen = self.nodes, n_inputs = self.n_inputs , n_outputs = self.n_outputs)
             self.population.append(g)
         
         for i in self.population:
@@ -127,33 +122,44 @@ class NEAT:
                     f = fitness_func(NeuralNetwork(genome))
                     genome.fitness = f 
 
-    def compactibility(self , gnome1 , gnome2):
-        # returns compactibility value (delta)
+    def compactibility(self , genome1 , genome2):
         E = D = W = 0
-        len1 = len(gnome1.connection_genes)
-        len2 = len(gnome2.connection_genes)
-        E = np.abs(len1 - len2)
+        conn1 = genome1.connection_genes
+        conn2 = genome2.connection_genes
         
-        if len1 > len2:
-            N = len1
-            for i in range(len1):
-                temp = gnome2.get_connection(gnome1.connection_genes[i].innovation_number)
-                if temp:
-                    W += np.abs(gnome1.connection_genes[i].weight - temp.weight)
+        conn1.sort(key = lambda x: x.innovation_number)
+        conn2.sort(key = lambda x: x.innovation_number)
+        len1 = len(conn1)
+        len2 = len(conn2)
+
+        n1 = n2 = 0
+        w_len = 1
+        while n1 < len1 and n2 < len2:
+            c1 = conn1[n1] if n1 < len1 else None
+            c2 = conn2[n2] if n2 < len2 else None
+            if c1 and c2:
+                if c1.innovation_number == c2.innovation_number:
+                    W += np.abs( c1.weight - c2.weight )
+                    w_len += 1
+                    n1 += 1
+                    n2 += 1
+                elif c1.innovation_number < c2.innovation_number:
+                    D += 1
+                    n1 += 1
                 else:
                     D += 1
-        else:
-            N = len2
-            for i in range(len2):
-                temp = gnome1.get_connection(gnome2.connection_genes[i].innovation_number)
-                if temp:
-                    W += np.abs(gnome2.connection_genes[i].weight - temp.weight)
-                else:
-                    D += 1
-        
+                    n2 += 1
+            elif c2 == None and c1:
+                E += 1
+                n1 += 1
+            elif c1 == None and c2:
+                E += 1
+                n2 += 1
+
+        N = max(len1 , len2)
+        W /= w_len
         delta = (self.c1*E)/N + (self.c2*D)/N + self.c3*W
         return delta
-
             
     def tournament_selection(self, genomes, number_to_compare):
         champion = None
@@ -173,15 +179,13 @@ class NEAT:
         for i in range(max_generations):
             self.epoch(fitness_func)
             best_genome = self.get_best_genome()
-            print(best_genome.fitness)
+            print('Generation : ' , self.generation , '\t' , best_genome.fitness)
             self.best_of_each_generation[self.generation] = NeuralNetwork(best_genome)
 
             if best_genome.fitness >= max_fitness:
-                print(fitness_func(NeuralNetwork(best_genome) , return_output=True))
-
-                break
+                return NeuralNetwork(best_genome)
             self.generation += 1
-        return self.best_of_each_generation
+        return NeuralNetwork(best_genome)
 
 if __name__ == "__main__":
     neat = NEAT(2 , 1)
