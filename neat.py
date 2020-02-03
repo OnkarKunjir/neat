@@ -109,17 +109,27 @@ class NEAT:
         for s in self.species:
             s.members.sort(key = lambda x : x.fitness , reverse = True)
             s.representative = np.random.choice(s.members)
-            s.average_fitness = sum([i.fitness for i in s.members ])/len(s.members)
-            if s.leader.fitness < s.members[0].fitness:
-                s.leader = deepcopy(s.members[0])
-            else:
+            average_fitness = sum([i.fitness for i in s.members ])/len(s.members)
+            if average_fitness <= s.average_fitness:
                 s.generations_not_improved += 1
+
+            s.average_fitness = average_fitness
+            s.leader = deepcopy(s.members[0])
+        # for s in self.species:
+        #     s.members.sort(key = lambda x : x.fitness , reverse = True)
+        #     s.representative = np.random.choice(s.members)
+        #     s.average_fitness = sum([i.fitness for i in s.members ])/len(s.members)
+        #     if s.leader.fitness < s.members[0].fitness:
+        #         s.leader = deepcopy(s.members[0])
+        #     else:
+        #         s.generations_not_improved += 1
     
     def evaluate(self, fitness_func = None):
         if fitness_func:
             for s in self.species:
                 for genome in s.members:
                     f = fitness_func(NeuralNetwork(genome))
+                    # print(f)
                     genome.fitness = f 
 
     def compactibility(self , genome1 , genome2):
@@ -182,8 +192,8 @@ class NEAT:
             print('Generation : ' , self.generation , '\t' , best_genome.fitness)
             self.best_of_each_generation[self.generation] = NeuralNetwork(best_genome)
 
-            if best_genome.fitness >= max_fitness:
-                return NeuralNetwork(best_genome)
+            # if best_genome.fitness >= max_fitness:
+            #     return NeuralNetwork(best_genome)
             self.generation += 1
         return NeuralNetwork(best_genome)
 
